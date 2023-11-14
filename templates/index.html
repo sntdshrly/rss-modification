@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Search</title>
+</head>
+<body>
+    <h1>News Search</h1>
+    <form id="searchForm">
+        <label for="keyword">Search Keyword:</label>
+        <input type="text" id="keyword" name="keyword" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+    <h2>Trending Keywords</h2>
+    <ul id="trendingList"></ul>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const keyword = document.getElementById('keyword').value;
+            fetch(`/news?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    data.news.forEach(news => {
+                        resultsDiv.innerHTML += `<p><a href="${news.link}" target="_blank">${news.title}</a></p>`;
+                    });
+
+                    const trendingList = document.getElementById('trendingList');
+                    trendingList.innerHTML = '';
+                    data.trending_keywords.forEach(keyword => {
+                        trendingList.innerHTML += `<li>${keyword[0]} (${keyword[1]} times)</li>`;
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

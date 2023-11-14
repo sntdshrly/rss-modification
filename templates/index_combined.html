@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Portal</title>
+</head>
+<body>
+    <h1>News Portal</h1>
+
+    <section>
+        <h2>News</h2>
+        <div id="news-results"></div>
+        <div id="trending-keywords"></div>
+    </section>
+
+    <section>
+        <h2>Inbox</h2>
+        <div id="inbox-results"></div>
+    </section>
+
+    <script>
+        // Fungsi untuk menandai berita sebagai sudah terbaca
+        function markAsRead(link) {
+            fetch(`/mark_as_read/${link}`, { method: 'PUT' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadInbox();
+                });
+        }
+
+        // Fungsi untuk memuat berita dan trending keywords
+        function loadNews() {
+            fetch('/news')
+                .then(response => response.json())
+                .then(data => {
+                    const newsResultsDiv = document.getElementById('news-results');
+                    const trendingKeywordsDiv = document.getElementById('trending-keywords');
+
+                    // Menampilkan berita
+                    newsResultsDiv.innerHTML = '<h3>Latest News</h3>';
+                    data.news.forEach(news => {
+                        newsResultsDiv.innerHTML += `<p><a href="${news.link}" target="_blank">${news.title}</a> - Category: ${news.category}</p>`;
+                    });
+
+                    // Menampilkan trending keywords
+                    trendingKeywordsDiv.innerHTML = '<h3>Trending Keywords</h3>';
+                    data.trending_keywords.forEach(keyword => {
+                        trendingKeywordsDiv.innerHTML += `<p>${keyword[0]} (${keyword[1]} searches)</p>`;
+                    });
+                });
+        }
+
+        // Fungsi untuk memuat inbox
+        function loadInbox() {
+            fetch('/inbox')
+                .then(response => response.json())
+                .then(data => {
+                    const inboxResultsDiv = document.getElementById('inbox-results');
+
+                    // Menampilkan inbox
+                    inboxResultsDiv.innerHTML = '<h3>Your Inbox</h3>';
+                    data.inbox.forEach(item => {
+                        const readStatus = item.read ? 'read' : 'unread';
+                        inboxResultsDiv.innerHTML += `<p class="${readStatus}"><a href="${item.link}" target="_blank">${item.title}</a> - Category: ${item.category} <button onclick="markAsRead('${item.link}')">Mark as Read</button></p>`;
+                    });
+                });
+        }
+
+        // Memuat data saat halaman dimuat
+        loadNews();
+        loadInbox();
+    </script>
+</body>
+</html>
